@@ -8,9 +8,10 @@ module.exports = {
   up: async (queryInterface, Sequelize) => {
     await queryInterface.createTable('product', {
       product_id: {
-        type: Sequelize.STRING,
+        type: Sequelize.BIGINT,
         allowNull: false,
         comment: "商品id",
+        autoIncrement: true,
         primaryKey: true
       },
       product_name: {
@@ -35,6 +36,7 @@ module.exports = {
       },
       product_stock: {
         type: Sequelize.INTEGER,
+        defaultValue: 0,
         comment: "库存"
       },
       product_status: {

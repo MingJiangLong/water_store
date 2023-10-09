@@ -5,20 +5,21 @@ import {
   DataType,
   CreatedAt,
   UpdatedAt,
+  AutoIncrement,
 } from 'sequelize-typescript';
 import { ProductStatus } from '../shared/enum/ProductStatus';
 
 @Table({
   tableName: 'product',
 })
-export class Product extends Model<Product> {
+export class Product extends Model<Product>  {
+  @AutoIncrement
   @Column({
-    type: DataType.UUID,
-    defaultValue: DataType.UUIDV4,
+    type: DataType.BIGINT,
     primaryKey: true,
-    field: 'product_id'
+    field: 'product_id',
   })
-  productId: string;
+  productId: number;
 
   @Column({
     type: DataType.STRING,
@@ -42,7 +43,7 @@ export class Product extends Model<Product> {
     type: DataType.DECIMAL,
     field: 'product_size'
   })
-  productSize: string;
+  productSize: number;
 
   @Column({
     type: DataType.DECIMAL,
@@ -52,7 +53,8 @@ export class Product extends Model<Product> {
 
   @Column({
     type: DataType.INTEGER,
-    field: 'product_stock'
+    field: 'product_stock',
+    defaultValue: 0
   })
   productStock: number;
 

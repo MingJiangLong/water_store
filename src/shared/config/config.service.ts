@@ -10,4 +10,12 @@ export class ConfigService {
     get jwtConfig() {
         return { privateKey: config.jwtPrivateKey };
     }
+
+    get WECHAT_APPID() {
+        return ''
+    }
+
+    get WECHAT_SECRET() {
+        return '';
+    }
 }
