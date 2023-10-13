@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsEnum, IsNotEmpty, IsNumber, IsOptional, IsString, IsUrl, MaxLength } from 'class-validator';
-import { ProductStatus } from 'src/shared/enum/ProductStatus';
+import { ProductStatus } from '../../shared/enum/ProductStatus';
 export class CreateProductDto {
   @ApiProperty()
   @MaxLength(60, { message: "商品名称长度不能超过60个字符" })
@@ -28,7 +28,7 @@ export class CreateProductDto {
   productPrice: number;
 
   @ApiProperty()
-  @IsNumber(void 0, { message: "商品价格只能为数字" })
+  @IsNumber(void 0, { message: "商品库存只能为数字" })
   @IsOptional()
   readonly productStock: number;
 

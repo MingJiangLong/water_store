@@ -11,9 +11,12 @@
     "target": "es6",
     "sourceMap": true,
     "outDir": "./dist",
-    "baseUrl": "./",
+    // "baseUrl": ".",
+    // "paths": {
+    //   "*": ["*"]
+    // },
     "resolveJsonModule": true,
     "esModuleInterop": true
   },
-  "exclude": ["node_modules"]
+  "exclude": ["node_modules","test"]
 }

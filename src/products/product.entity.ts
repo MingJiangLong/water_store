@@ -6,17 +6,20 @@ import {
   CreatedAt,
   UpdatedAt,
   AutoIncrement,
+  HasMany,
+  PrimaryKey,
 } from 'sequelize-typescript';
 import { ProductStatus } from '../shared/enum/ProductStatus';
+import { SupplyRecord } from '../supply-record/supply-record.entity';
 
 @Table({
   tableName: 'product',
 })
 export class Product extends Model<Product>  {
   @AutoIncrement
+  @PrimaryKey
   @Column({
     type: DataType.BIGINT,
-    primaryKey: true,
     field: 'product_id',
   })
   productId: number;
@@ -65,8 +68,6 @@ export class Product extends Model<Product>  {
   })
   productStatus: ProductStatus;
 
-
-
   @CreatedAt
   @Column({
     field: 'created_at',
@@ -81,4 +82,7 @@ export class Product extends Model<Product>  {
     type: DataType.DATE,
   })
   updateAt: Date;
+
+  @HasMany(() => SupplyRecord)
+  supplyList: SupplyRecord[]
 }
