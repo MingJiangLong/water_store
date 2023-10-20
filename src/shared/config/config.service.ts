@@ -12,10 +12,10 @@ export class ConfigService {
     }
 
     get WECHAT_APPID() {
-        return ''
+        return config.wechatAppId
     }
 
     get WECHAT_SECRET() {
-        return '';
+        return config.wechatSecret;
     }
 }

@@ -1,4 +1,4 @@
-import { Injectable, Inject, HttpException, HttpStatus } from '@nestjs/common';
+import { Injectable, Inject, HttpException, HttpStatus, NotFoundException, ConflictException } from '@nestjs/common';
 import { User } from './user.entity';
 import { genSalt, hash, compare } from 'bcrypt';
 import { UserDto } from './dto/user.dto';
@@ -9,76 +9,24 @@ import { JwtPayload } from './auth/jwt-payload.model';
 import { sign } from 'jsonwebtoken';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { ConfigService } from '../shared/config/config.service';
-import { Repository } from 'sequelize-typescript';
+import { Repository, Sequelize } from 'sequelize-typescript';
+import { BackendUserLoginDto } from './dto/login.dto';
+import { BackendUserLoginResponseDto } from './dto/backend-user-login-response.dto';
+import { CreateBackendUserDto } from './dto/create-backend-user.dto';
+import SuccessResponse from '../common/SuccessResponse';
 
 @Injectable()
 export class UserService {
     private readonly jwtPrivateKey: string;
-
+    private readonly userRepository: Repository<User>
     constructor(
-        @Inject('UserRepository')
-        private readonly userRepository: Repository<User>,
+        @Inject('SEQUELIZE')
+        private readonly sequelize: Sequelize,
         private readonly configService: ConfigService,
     ) {
+        this.userRepository = <Repository<User>>this.sequelize.models.User;
         this.jwtPrivateKey = this.configService.jwtConfig.privateKey;
     }
-
-    // async findAll() {
-    //     const users = await this.usersRepository.findAll<User>();
-    //     return users.map(user => new UserDto(user));
-    // }
-
-    // async getUser(id: string) {
-    //     const user = await this.usersRepository.findByPk<User>(id);
-    //     if (!user) {
-    //         throw new HttpException(
-    //             'User with given id not found',
-    //             HttpStatus.NOT_FOUND,
-    //         );
-    //     }
-    //     return new UserDto(user);
-    // }
-
-    // async getUserByEmail(email: string) {
-    //     return await this.usersRepository.findOne<User>({
-    //         where: { email },
-    //     });
-    // }
-
-    // async create(createUserDto: CreateUserDto) {
-    //     try {
-    //         const user = new User();
-    //         user.email = createUserDto.email.trim().toLowerCase();
-    //         user.gender = createUserDto.gender;
-    //         user.birthday = createUserDto.birthday;
-
-    //         const salt = await genSalt(10);
-    //         user.password = await hash(createUserDto.password, salt);
-
-    //         const userData = await user.save();
-
-    //         // when registering then log user in automatically by returning a token
-    //         const token = await this.signToken(userData);
-    //         return new UserLoginResponseDto(userData, token);
-    //     } catch (err) {
-    //         if (err.original.constraint === 'user_email_key') {
-    //             throw new HttpException(
-    //                 `User with email '${err.errors[0].value}' already exists`,
-    //                 HttpStatus.CONFLICT,
-    //             );
-    //         }
-
-    //         throw new HttpException(err, HttpStatus.INTERNAL_SERVER_ERROR);
-    //     }
-    // }
-
-    // async findUserByOpenId(openId: string) {
-    //     return await this.usersRepository.findOne<User>({
-    //         where: {
-    //             openId
-    //         }
-    //     })
-    // }
 
     /**
      * 有管理员或者微信用户登录
@@ -86,29 +34,44 @@ export class UserService {
      * @returns 
      */
     async login(adminLoginRequestDto: AdminLoginRequestDto) {
-        const account = adminLoginRequestDto.account;
-        const password = adminLoginRequestDto.password;
-
-        const user = await this.getAdminUserByAccount(account);
-        if (!user) {
-            throw new HttpException(
-                '用户名或者密码错误',
-                HttpStatus.BAD_REQUEST,
-            );
-        }
-
-        const isMatch = await compare(password, user.password);
-        if (!isMatch) {
-            throw new HttpException(
-                '用户名或者密码错误',
-                HttpStatus.BAD_REQUEST,
-            );
-        }
-        const token = await this.signToken(user);
-        return new UserLoginResponseDto(user, token);
+        return console.log("hello")
     }
 
-    getAdminUserByAccount(account: string) {
+    async backendUserLogin(backendUserLoginDto: BackendUserLoginDto) {
+        const account = backendUserLoginDto.account;
+        const password = backendUserLoginDto.password;
+        const user = await this.findUserByAccount(account);
+        if (!user) throw new NotFoundException('用户名或者密码错误')
+
+        const isPasswordCorrect = compare(password, user.password);
+        if (!isPasswordCorrect) throw new NotFoundException('用户名或者密码错误')
+
+        const token = this.sign(user.account);
+        return new BackendUserLoginResponseDto(user, token);
+    }
+
+    async createBackendUser(createBackendUserDto: CreateBackendUserDto) {
+        const isBackendUserExist = await this.userRepository.findOne({
+            where: {
+                account: createBackendUserDto.account
+            }
+        })
+
+        if (isBackendUserExist) throw new ConflictException("账号已存在")
+
+        const user = new User()
+        user.account = createBackendUserDto.account;
+        user.password = await this.signPassword('123456');
+        await user.save()
+        return new SuccessResponse(createBackendUserDto)
+
+    }
+
+    findUserPermissionById(id: number) {
+
+    }
+
+    findUserByAccount(account: string) {
         return this.userRepository.findOne({
             where: {
                 account
@@ -116,34 +79,22 @@ export class UserService {
         })
     }
 
-    // async update(id: string, updateUserDto: UpdateUserDto) {
-    //     const user = await this.usersRepository.findByPk<User>(id);
-    //     if (!user) {
-    //         throw new HttpException('User not found.', HttpStatus.NOT_FOUND);
-    //     }
-
-    //     user.gender = updateUserDto.gender || user.gender;
-    //     user.birthday = updateUserDto.birthday || user.birthday;
-
-    //     try {
-    //         const data = await user.save();
-    //         return new UserDto(data);
-    //     } catch (err) {
-    //         throw new HttpException(err, HttpStatus.INTERNAL_SERVER_ERROR);
-    //     }
-    // }
-
-    // async delete(id: string) {
-    //     const user = await this.usersRepository.findByPk<User>(id);
-    //     await user.destroy();
-    //     return new UserDto(user);
-    // }
-
-    async signToken(user: User) {
-        const payload: JwtPayload = {
-            account: user.account,
+    /**
+     * TODO:记录请求来源origin
+     * @param account 
+     * @returns 
+     */
+    sign(account: string) {
+        const payload = {
+            account,
+            origin: ''
         };
-
         return sign(payload, this.jwtPrivateKey, {});
     }
+
+    async signPassword(password: string) {
+        const salt = await genSalt(10)
+        return hash(password, salt);
+    }
+
 }

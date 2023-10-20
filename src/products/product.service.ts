@@ -5,6 +5,7 @@ import { ProductStatus } from "../shared/enum/ProductStatus";
 import { Repository } from "sequelize-typescript";
 import { RetrieveProductDto } from "./dto/retrieve-product.dto";
 import { SupplyRecordService } from "../supply-record/supply-record.service";
+import SuccessResponse from "../common/SuccessResponse";
 
 @Injectable()
 export class ProductService {
@@ -21,13 +22,17 @@ export class ProductService {
 
     if (isProductExistAndAble) throw new ConflictException('商品名已存在!');
     const product = new Product();
+
+    
     Object.keys(createProductDto).forEach(key => {
       product[key] = createProductDto[key]
     })
 
     product.productName = createProductDto.productName;
     product.productPrice = createProductDto.productPrice;
-    return product.save()
+    await product.save()
+
+    return new SuccessResponse(product, "创建商品成功")
 
   }
 

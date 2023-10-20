@@ -1,19 +1,14 @@
-import { AutoIncrement, Column, DataType, Model, PrimaryKey, Table } from "sequelize-typescript";
+import { Column, DataType, Table } from "sequelize-typescript";
+import { EntityModel } from "../common/EntityModel";
 
 @Table({
-  tableName: 'role'
+  tableName: "role"
 })
+export class Role extends EntityModel<Role>{
 
-export class Role extends Model<Role> {
+  @Column(DataType.STRING)
+  name: string
 
-  @AutoIncrement
-  @PrimaryKey
-  @Column
-  id: number
-
-  @Column({
-    type: DataType.STRING,
-    field: 'role_name'
-  })
-  roleName: string
+  @Column(DataType.STRING)
+  code: string
 }

@@ -7,13 +7,10 @@ import {
     DataType,
     CreatedAt,
     UpdatedAt,
-    DeletedAt,
-    HasMany,
     PrimaryKey,
     AutoIncrement,
 } from 'sequelize-typescript';
 import { Gender } from '../shared/enum/Gender';
-import { UserStatus } from '../shared/enum/UserStatus';
 import { AccountStatus } from '../shared/enum/AccountStatus';
 
 @Table({
@@ -60,8 +57,11 @@ export class User extends Model<User> {
     })
     accountStatus: AccountStatus
 
-
-
+    @Column({
+        field: 'id_card',
+        type: DataType.STRING
+    })
+    idCard: string
     @Column(DataType.DATEONLY)
     birthday: string;
 

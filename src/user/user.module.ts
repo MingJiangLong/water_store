@@ -3,14 +3,15 @@ import { UserController } from './user.controller';
 import { usersProviders } from './user.providers';
 import { UserService } from './user.service';
 import { JwtStrategy } from './auth/jwt-strategy';
+import { DatabaseModule } from '../database/database.module';
+import { BackendUserController } from './backend-user.controller';
 
 @Module({
-    imports: [],
+    imports: [DatabaseModule],
     providers: [
         UserService,
-        
         ...usersProviders, JwtStrategy],
-    controllers: [UserController],
+    controllers: [UserController, BackendUserController],
     exports: [UserService],
 })
 export class UsersModule { }

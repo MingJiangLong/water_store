@@ -11,4 +11,6 @@ export const config = {
         logging: false,
     },
     jwtPrivateKey: 'jwtPrivateKey',
+    wechatAppId: "wxa68387a8cb36847f",
+    wechatSecret: "9f58c2964e210c736f0ac9c2710575d9"
 };

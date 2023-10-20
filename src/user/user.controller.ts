@@ -18,26 +18,18 @@ import { UserLoginResponseDto } from './dto/user-login-response.dto';
 import { AuthGuard } from '@nestjs/passport';
 import { UpdateUserDto } from './dto/update-user.dto';
 
-@Controller('users')
-@ApiTags('users')
+@Controller('user')
+@ApiTags('user')
 export class UserController {
     constructor(private readonly userService: UserService) { }
-
-    // @Post('register')
-    // @ApiOkResponse({ type: UserLoginResponseDto })
-    // register(
-    //     @Body() createUserDto: CreateUserDto,
-    // ): Promise<UserLoginResponseDto> {
-    //     return this.usersService.create(createUserDto);
-    // }
 
     @Post('login')
     @HttpCode(200)
     @ApiOkResponse({ type: UserLoginResponseDto })
     login(
         @Body() userLoginRequestDto: AdminLoginRequestDto,
-    ): Promise<UserLoginResponseDto> {
-        return this.userService.login(userLoginRequestDto);
+    ) {
+        this.userService.login(userLoginRequestDto);
     }
 
     // @Get()
